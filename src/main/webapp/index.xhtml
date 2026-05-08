@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Dashboard de Substituicao de Paginas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <h:outputStylesheet library="webjars" name="primeflex/3.3.1/primeflex.min.css"/>
+    <h:outputStylesheet library="webjars" name="primeicons/7.0.0/primeicons.css"/>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body styleClass="dashboard-body">
+    <h:form id="dashboardForm">
+        <p:growl id="messages" showDetail="true" life="3500"/>
+
+        <div class="page-shell">
+            <section class="hero-panel">
+                <div>
+                    <span class="eyebrow">Sistemas Operacionais</span>
+                    <h1>Visualizador de Algoritmos de Substituicao de Paginas</h1>
+                    <p>Simule FIFO, LRU, Relogio e Otimo em um dashboard didatico, responsivo e focado em analise academica.</p>
+                </div>
+                <div class="hero-meta">
+                    <div class="hero-badge">
+                        <i class="pi pi-desktop"></i>
+                        <span>JSF + PrimeFaces</span>
+                    </div>
+                    <div class="hero-badge">
+                        <i class="pi pi-chart-bar"></i>
+                        <span>Visualizacao Interativa</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid dashboard-grid">
+                <div class="col-12 xl:col-4">
+                    <p:panel header="Painel de Simulacao" styleClass="surface-card panel-card">
+                        <div class="field-block">
+                            <p:outputLabel for="frameCount" value="Quantidade de quadros"/>
+                            <p:inputNumber id="frameCount" value="#{simulationDashboardController.frameCount}" minValue="1" decimalPlaces="0" styleClass="w-full"/>
+                        </div>
+                        <div class="field-block">
+                            <p:outputLabel for="pageSequence" value="Sequencia de paginas"/>
+                            <p:inputTextarea id="pageSequence" value="#{simulationDashboardController.pageSequence}" rows="4" autoResize="false"
+                                             placeholder="Exemplo: 7 0 1 2 0 3 0 4" styleClass="w-full"/>
+                        </div>
+                        <div class="field-block">
+                            <p:outputLabel for="selectedAlgorithm" value="Algoritmo principal"/>
+                            <p:selectOneMenu id="selectedAlgorithm" value="#{simulationDashboardController.selectedAlgorithm}" styleClass="w-full">
+                                <f:selectItems value="#{simulationDashboardController.algorithmOptions}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="field-block">
+                            <p:outputLabel for="comparisonAlgorithms" value="Comparacao entre algoritmos"/>
+                            <p:selectCheckboxMenu id="comparisonAlgorithms" value="#{simulationDashboardController.comparisonAlgorithms}"
+                                                  label="Selecionar algoritmos" multiple="true" updateLabel="true" styleClass="w-full">
+                                <f:selectItems value="#{simulationDashboardController.algorithmOptions}"/>
+                            </p:selectCheckboxMenu>
+                        </div>
+                        <p:commandButton value="Executar Simulacao" icon="pi pi-play"
+                                         actionListener="#{simulationDashboardController.executeSimulation}"
+                                         update="@form" process="@form" styleClass="run-button"/>
+                    </p:panel>
+                </div>
+
+                <div class="col-12 xl:col-8">
+                    <div class="grid">
+                        <div class="col-12 md:col-6 xl:col-3">
+                            <div class="metric-card">
+                                <span class="metric-label">Referencias</span>
+                                <span class="metric-value">#{simulationDashboardController.selectedResult.metrics.totalReferences}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-6 xl:col-3">
+                            <div class="metric-card alert">
+                                <span class="metric-label">Page Faults</span>
+                                <span class="metric-value">#{simulationDashboardController.selectedResult.metrics.pageFaults}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-6 xl:col-3">
+                            <div class="metric-card success">
+                                <span class="metric-label">Hits</span>
+                                <span class="metric-value">#{simulationDashboardController.selectedResult.metrics.hits}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-6 xl:col-3">
+                            <div class="metric-card info">
+                                <span class="metric-label">Taxa de acerto</span>
+                                <span class="metric-value">#{simulationDashboardController.formatRate(simulationDashboardController.selectedResult.metrics.hitRate)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="col-12 lg:col-7">
+                            <p:panel header="Visualizacao da Memoria" styleClass="surface-card panel-card">
+                                <p:dataTable value="#{simulationDashboardController.selectedResult.steps}" var="step" reflow="true"
+                                             paginator="true" rows="8" styleClass="memory-table">
+                                    <p:column headerText="Passo">
+                                        <span class="step-index">#{step.step}</span>
+                                    </p:column>
+                                    <p:column headerText="Pagina">
+                                        <span class="page-chip">#{step.referencedPage}</span>
+                                    </p:column>
+                                    <p:column headerText="Quadros">
+                                        <div class="frame-list">
+                                            <ui:repeat value="#{step.memoryFrames}" var="frame">
+                                                <span class="frame-chip">#{simulationDashboardController.formatFrame(frame)}</span>
+                                            </ui:repeat>
+                                        </div>
+                                    </p:column>
+                                    <p:column headerText="Evento">
+                                        <span class="event-badge #{simulationDashboardController.resolveEventClass(step)}">
+                                            <i class="#{simulationDashboardController.resolveEventIcon(step)}"></i>
+                                            #{step.eventLabel}
+                                        </span>
+                                    </p:column>
+                                    <p:column headerText="Removida">
+                                        <span class="removed-page">#{simulationDashboardController.formatFrame(step.removedPage)}</span>
+                                    </p:column>
+                                </p:dataTable>
+                            </p:panel>
+                        </div>
+
+                        <div class="col-12 lg:col-5">
+                            <p:panel header="Distribuicao da Simulacao" styleClass="surface-card panel-card chart-panel">
+                                <p:chart type="doughnut" model="#{simulationDashboardController.distributionChartModel}" style="height: 300px;"/>
+                                <div class="efficiency-strip">
+                                    <span>Eficiencia</span>
+                                    <strong>#{simulationDashboardController.formatRate(simulationDashboardController.selectedResult.metrics.efficiency)}</strong>
+                                </div>
+                            </p:panel>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 lg:col-7">
+                    <p:panel header="Comparacao entre Algoritmos" styleClass="surface-card panel-card">
+                        <p:dataTable value="#{simulationDashboardController.comparisonResults}" var="result" reflow="true">
+                            <p:column headerText="Ranking">
+                                <span class="ranking-badge #{simulationDashboardController.resolveRankingClass(result.ranking)}">##{result.ranking}</span>
+                            </p:column>
+                            <p:column headerText="Algoritmo">
+                                <div class="algorithm-cell">
+                                    <i class="#{result.icon}"></i>
+                                    <span>#{result.algorithmLabel}</span>
+                                </div>
+                            </p:column>
+                            <p:column headerText="Faults">
+                                <span class="stat-highlight negative">#{result.pageFaults}</span>
+                            </p:column>
+                            <p:column headerText="Hits">
+                                <span class="stat-highlight positive">#{result.hits}</span>
+                            </p:column>
+                            <p:column headerText="Taxa de acerto">
+                                #{simulationDashboardController.formatRate(result.hitRate)}
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </div>
+
+                <div class="col-12 lg:col-5">
+                    <p:panel header="Painel do Relogio" styleClass="surface-card panel-card">
+                        <h:panelGroup rendered="#{simulationDashboardController.clockSelected}">
+                            <div class="clock-board">
+                                <ui:repeat value="#{simulationDashboardController.clockFrames}" var="frame" varStatus="status">
+                                    <div class="#{simulationDashboardController.resolveClockSlotClass(status.index)}">
+                                        <span class="slot-index">Q#{status.index + 1}</span>
+                                        <strong>#{simulationDashboardController.formatFrame(frame)}</strong>
+                                        <span class="bit-label">
+                                            Bit #{simulationDashboardController.clockReferenceBitLabel(status.index)}
+                                        </span>
+                                    </div>
+                                </ui:repeat>
+                            </div>
+                            <div class="clock-summary">
+                                <span>Ponteiro atual: #{simulationDashboardController.clockPointerLabel}</span>
+                                <span>Segunda chance: #{simulationDashboardController.clockSecondChanceLabel}</span>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{not simulationDashboardController.clockSelected}">
+                            <div class="empty-state">
+                                <i class="pi pi-sync"></i>
+                                <span>Selecione o algoritmo Relogio como principal para habilitar esta visualizacao.</span>
+                            </div>
+                        </h:panelGroup>
+                    </p:panel>
+                </div>
+
+                <div class="col-12 lg:col-6">
+                    <p:panel header="Grafico de Barras" styleClass="surface-card panel-card chart-panel">
+                        <p:chart type="bar" model="#{simulationDashboardController.faultChartModel}" style="height: 320px;"/>
+                    </p:panel>
+                </div>
+
+                <div class="col-12 lg:col-6">
+                    <p:panel header="Grafico Comparativo" styleClass="surface-card panel-card chart-panel">
+                        <p:chart type="bar" model="#{simulationDashboardController.rankingChartModel}" style="height: 320px;"/>
+                    </p:panel>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</h:body>
+</html>

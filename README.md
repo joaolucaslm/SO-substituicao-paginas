@@ -1,108 +1,73 @@
 # SO-substituicao-paginas
 
+Simulador academico de substituicao de paginas com duas abordagens:
 
-Simulador em Java para comparar algoritmos de substituicao de paginas no gerenciamento de memoria virtual.
-
+- simulador original em console, preservado em `src/`
+- dashboard web com JSF + PrimeFaces, agora executado com Spring Boot embarcado em `src/main/`
 
 ## Algoritmos implementados
 
-
 1. FIFO
 2. LRU
-3. Relogio
+3. Relogio (Clock)
 4. Otimo
 
+## Dashboard web
 
-## Como executar
+O dashboard foi organizado com foco em separacao de responsabilidades:
 
+- `controller`: controllers JSF e redirecionamento inicial
+- `service`: orquestracao e adaptacao da simulacao
+- `dto`: transferencia de dados para a interface
+- `model`: enums e modelos de dominio
+- `simulator`: implementacoes detalhadas dos algoritmos
+- `util`: parse e validacoes simples
+
+Recursos da interface:
+
+- painel de simulacao com AJAX
+- tabela detalhada da memoria por passo
+- cards de metricas
+- comparacao entre algoritmos
+- graficos PrimeFaces
+- visualizacao didatica do algoritmo Relogio
+
+## Como executar o dashboard
+
+Pre-requisitos:
+
+- Java 17+
+- Maven 3.9+
+
+Subir localmente:
+
+```bash
+mvn spring-boot:run
+```
+
+Depois abra:
+
+```text
+http://localhost:8080/
+```
+
+Gerar artefato executavel:
+
+```bash
+mvn clean package
+java -jar target/page-replacement-dashboard.war
+```
+
+## Como executar o simulador console
 
 Compile:
-
 
 ```bash
 javac src/*.java
 ```
 
-
 Execute:
-
 
 ```bash
 java -cp src SimuladorSubstituicaoPaginas
 ```
-
-
-## Fluxo da aplicacao
-
-
-O programa segue este fluxo:
-
-
-1. `SimuladorSubstituicaoPaginas` inicia a aplicacao e coordena a execucao.
-2. `LeitorEntrada` le a quantidade de quadros e a sequencia de paginas informadas pelo usuario.
-3. `SimulacaoService` recebe os dados de entrada e executa todos os algoritmos de substituicao.
-4. Cada algoritmo roda em sua propria classe:
-   `AlgoritmoFifo`, `AlgoritmoLru`, `AlgoritmoRelogio` e `AlgoritmoOtimo`.
-5. Os resultados sao agrupados em `ResultadoSimulacao`.
-6. `ExibidorResultado` mostra na tela a quantidade de faltas de pagina de cada metodo.
-
-
-Resumo do fluxo:
-
-
-```text
-SimuladorSubstituicaoPaginas
-        -> LeitorEntrada
-        -> SimulacaoService
-            -> AlgoritmoFifo
-            -> AlgoritmoLru
-            -> AlgoritmoRelogio
-            -> AlgoritmoOtimo
-        -> ResultadoSimulacao
-        -> ExibidorResultado
-```
-
-
-## Estrutura das classes
-
-
-- `SimuladorSubstituicaoPaginas`: ponto de entrada da aplicacao.
-- `LeitorEntrada`: valida e converte os dados digitados pelo usuario.
-- `SimulacaoService`: centraliza a chamada dos algoritmos.
-- `ResultadoSimulacao`: armazena os resultados finais da simulacao.
-- `ExibidorResultado`: formata e exibe a saida no console.
-- `AlgoritmoFifo`: implementa o algoritmo FIFO.
-- `AlgoritmoLru`: implementa o algoritmo LRU.
-- `AlgoritmoRelogio`: implementa o algoritmo Relogio.
-- `AlgoritmoOtimo`: implementa o algoritmo Otimo.
-
-
-## Entrada esperada
-
-
-O programa solicita:
-
-
-- quantidade de quadros de memoria
-- sequencia de paginas separadas por espaco
-
-
-Exemplo:
-
-
-```text
-Quantidade de quadros: 3
-Sequencia de paginas: 7 0 1 2 0 3 0 4 2 3 0 3 2
-```
-
-
-## Saida esperada
-
-
-```text
-Metodo 1 (FIFO) - X faltas de pagina
-Metodo 2 (LRU) - X faltas de pagina
-Metodo 3 (Relogio) - X faltas de pagina
-Metodo 4 (Otimo) - X faltas de pagina
-```
-
