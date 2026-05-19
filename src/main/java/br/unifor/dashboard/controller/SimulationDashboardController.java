@@ -135,6 +135,10 @@ public class SimulationDashboardController implements Serializable {
         return Boolean.TRUE.equals(clockState.getReferenceBits().get(index)) ? "1" : "0";
     }
 
+    public String clockReferenceBitLabel(Integer index) {
+        return index == null ? "0" : getClockReferenceBitLabel(index);
+    }
+
     public String getClockPointerLabel() {
         ClockStateDto clockState = getClockState();
         if (clockState == null) {
