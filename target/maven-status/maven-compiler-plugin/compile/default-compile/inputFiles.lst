@@ -1,5 +1,6 @@
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\controller\HomeRedirectController.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\controller\SimulationDashboardController.java
+C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\controller\SimulationDashboardDefaults.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\dto\AlgorithmComparisonDto.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\dto\ClockStateDto.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\dto\LegacySimulationSummaryDto.java
@@ -11,7 +12,9 @@ C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\model\SimulationAlgorithm.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\model\SimulationEventType.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\PageReplacementDashboardApplication.java
+C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\service\DashboardChartService.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\service\LegacySimulationAdapterService.java
+C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\service\SimulationDashboardViewService.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\service\SimulationFacadeService.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\simulator\AbstractDetailedSimulator.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\simulator\ClockDetailedSimulator.java
@@ -20,3 +23,5 @@ C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\simulator\LruDetailedSimulator.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\simulator\OptimalDetailedSimulator.java
 C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\util\PageSequenceParser.java
+C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\view\DashboardCharts.java
+C:\Users\Paulo Neto\Documents\Unifor\Scripts\Java\algs-substituicao-paginas\src\main\java\br\unifor\dashboard\view\SimulationDashboardViewData.java

@@ -126,7 +126,7 @@
 
                         <div class="col-12 lg:col-5">
                             <p:panel header="Distribuicao da Simulacao" styleClass="surface-card panel-card chart-panel">
-                                <p:chart type="doughnut" model="#{simulationDashboardController.distributionChartModel}" style="height: 300px;"/>
+                                <p:chart value="#{simulationDashboardController.distributionChartModel}" style="height: 300px;"/>
                                 <div class="efficiency-strip">
                                     <span>Eficiencia</span>
                                     <strong>#{simulationDashboardController.formatRate(simulationDashboardController.selectedResult.metrics.efficiency)}</strong>
@@ -191,13 +191,13 @@
 
                 <div class="col-12 lg:col-6">
                     <p:panel header="Grafico de Barras" styleClass="surface-card panel-card chart-panel">
-                        <p:chart type="bar" model="#{simulationDashboardController.faultChartModel}" style="height: 320px;"/>
+                        <p:chart value="#{simulationDashboardController.faultChartModel}" style="height: 320px;"/>
                     </p:panel>
                 </div>
 
                 <div class="col-12 lg:col-6">
                     <p:panel header="Grafico Comparativo" styleClass="surface-card panel-card chart-panel">
-                        <p:chart type="bar" model="#{simulationDashboardController.rankingChartModel}" style="height: 320px;"/>
+                        <p:chart value="#{simulationDashboardController.rankingChartModel}" style="height: 320px;"/>
                     </p:panel>
                 </div>
             </div>
