@@ -3,27 +3,18 @@ package br.unifor.dashboard.controller;
 import br.unifor.dashboard.dto.AlgorithmComparisonDto;
 import br.unifor.dashboard.dto.ClockStateDto;
 import br.unifor.dashboard.dto.MemoryStepDto;
-import br.unifor.dashboard.dto.SimulationDashboardDto;
-import br.unifor.dashboard.dto.SimulationRequestDto;
 import br.unifor.dashboard.dto.SimulationResultDto;
 import br.unifor.dashboard.model.SimulationAlgorithm;
-import br.unifor.dashboard.service.SimulationFacadeService;
-import br.unifor.dashboard.util.PageSequenceParser;
+import br.unifor.dashboard.service.SimulationDashboardViewService;
+import br.unifor.dashboard.view.SimulationDashboardViewData;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.primefaces.model.charts.ChartData;
-import org.primefaces.model.charts.bar.BarChartDataSet;
-import org.primefaces.model.charts.bar.BarChartModel;
-import org.primefaces.model.charts.donut.DonutChartDataSet;
-import org.primefaces.model.charts.donut.DonutChartModel;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -33,7 +24,7 @@ public class SimulationDashboardController implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.0");
 
-    private final SimulationFacadeService simulationFacadeService;
+    private final SimulationDashboardViewService simulationDashboardViewService;
 
     private int frameCount;
     private String pageSequence;
@@ -42,56 +33,48 @@ public class SimulationDashboardController implements Serializable {
     private List<SelectItem> algorithmOptions;
     private SimulationResultDto selectedResult;
     private List<AlgorithmComparisonDto> comparisonResults;
-    private BarChartModel faultChartModel;
-    private DonutChartModel distributionChartModel;
-    private BarChartModel rankingChartModel;
+    private String faultChartModel;
+    private String distributionChartModel;
+    private String rankingChartModel;
 
-    public SimulationDashboardController(SimulationFacadeService simulationFacadeService) {
-        this.simulationFacadeService = simulationFacadeService;
+    public SimulationDashboardController(SimulationDashboardViewService simulationDashboardViewService) {
+        this.simulationDashboardViewService = simulationDashboardViewService;
     }
 
     @PostConstruct
     public void init() {
-        frameCount = 3;
-        pageSequence = "7 0 1 2 0 3 0 4 2 3 0 3 2";
-        selectedAlgorithm = SimulationAlgorithm.CLOCK.getKey();
-        comparisonAlgorithms = new ArrayList<>(Arrays.asList(
-                SimulationAlgorithm.FIFO.getKey(),
-                SimulationAlgorithm.LRU.getKey(),
-                SimulationAlgorithm.CLOCK.getKey(),
-                SimulationAlgorithm.OPTIMAL.getKey()));
-        algorithmOptions = createAlgorithmOptions();
+        frameCount = SimulationDashboardDefaults.defaultFrameCount();
+        pageSequence = SimulationDashboardDefaults.defaultPageSequence();
+        selectedAlgorithm = SimulationDashboardDefaults.defaultSelectedAlgorithm();
+        comparisonAlgorithms = SimulationDashboardDefaults.defaultComparisonAlgorithms();
+        algorithmOptions = SimulationDashboardDefaults.algorithmOptions();
         executeSimulation();
     }
 
     public void executeSimulation() {
         try {
-            int[] pages = PageSequenceParser.parse(pageSequence);
-            List<String> selectedComparisons = comparisonAlgorithms == null
-                    ? Collections.emptyList()
-                    : new ArrayList<>(comparisonAlgorithms);
-            SimulationRequestDto request = new SimulationRequestDto(frameCount, pages, selectedComparisons, selectedAlgorithm);
-            SimulationDashboardDto dashboard = simulationFacadeService.execute(request);
-
-            selectedResult = dashboard.getSelectedResult();
-            comparisonResults = dashboard.getComparison();
-            buildCharts();
+            SimulationDashboardViewData viewData = simulationDashboardViewService.loadDashboard(
+                    frameCount,
+                    pageSequence,
+                    comparisonAlgorithms,
+                    selectedAlgorithm);
+            applyViewData(viewData);
             addMessage(FacesMessage.SEVERITY_INFO, "Simulacao concluida", "Os dados do dashboard foram atualizados.");
         } catch (IllegalArgumentException exception) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Entrada invalida", exception.getMessage());
         }
     }
 
-    public List<SelectItem> getAlgorithmOptions() {
-        return algorithmOptions;
+    private void applyViewData(SimulationDashboardViewData viewData) {
+        selectedResult = viewData.selectedResult();
+        comparisonResults = viewData.comparisonResults();
+        faultChartModel = viewData.charts().faultChartModel();
+        distributionChartModel = viewData.charts().distributionChartModel();
+        rankingChartModel = viewData.charts().rankingChartModel();
     }
 
-    private List<SelectItem> createAlgorithmOptions() {
-        List<SelectItem> items = new ArrayList<>();
-        for (SimulationAlgorithm algorithm : SimulationAlgorithm.values()) {
-            items.add(new SelectItem(algorithm.getKey(), algorithm.getLabel()));
-        }
-        return items;
+    public List<SelectItem> getAlgorithmOptions() {
+        return algorithmOptions;
     }
 
     public String formatRate(double value) {
@@ -145,7 +128,8 @@ public class SimulationDashboardController implements Serializable {
 
     public String getClockReferenceBitLabel(int index) {
         ClockStateDto clockState = getClockState();
-        if (clockState == null || clockState.getReferenceBits() == null || index < 0 || index >= clockState.getReferenceBits().size()) {
+        if (clockState == null || clockState.getReferenceBits() == null || index < 0
+                || index >= clockState.getReferenceBits().size()) {
             return "0";
         }
         return Boolean.TRUE.equals(clockState.getReferenceBits().get(index)) ? "1" : "0";
@@ -180,69 +164,6 @@ public class SimulationDashboardController implements Serializable {
             return "clock-slot pointer";
         }
         return "clock-slot";
-    }
-
-    private void buildCharts() {
-        if (selectedResult == null || comparisonResults == null || comparisonResults.isEmpty()) {
-            return;
-        }
-        buildFaultChart();
-        buildDistributionChart();
-        buildRankingChart();
-    }
-
-    private void buildFaultChart() {
-        faultChartModel = new BarChartModel();
-        ChartData data = new ChartData();
-        BarChartDataSet dataSet = new BarChartDataSet();
-        List<Object> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        for (AlgorithmComparisonDto result : comparisonResults) {
-            labels.add(result.getAlgorithmLabel());
-            values.add(result.getPageFaults());
-        }
-
-        dataSet.setLabel("Page Faults");
-        dataSet.setData(values);
-        dataSet.setBackgroundColor(List.of("#ef4444", "#f97316", "#0ea5e9", "#22c55e"));
-        data.addChartDataSet(dataSet);
-        data.setLabels(labels);
-        faultChartModel.setData(data);
-    }
-
-    private void buildDistributionChart() {
-        distributionChartModel = new DonutChartModel();
-        ChartData data = new ChartData();
-        DonutChartDataSet dataSet = new DonutChartDataSet();
-        List<Number> values = new ArrayList<>();
-        values.add(selectedResult.getMetrics().getHits());
-        values.add(selectedResult.getMetrics().getPageFaults());
-        dataSet.setData(values);
-        dataSet.setBackgroundColor(List.of("#22c55e", "#ef4444"));
-        data.addChartDataSet(dataSet);
-        data.setLabels(List.of("Hits", "Faults"));
-        distributionChartModel.setData(data);
-    }
-
-    private void buildRankingChart() {
-        rankingChartModel = new BarChartModel();
-        ChartData data = new ChartData();
-        BarChartDataSet dataSet = new BarChartDataSet();
-        List<Object> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        for (AlgorithmComparisonDto result : comparisonResults) {
-            labels.add("#" + result.getRanking() + " " + result.getAlgorithmKey());
-            values.add(result.getHits());
-        }
-
-        dataSet.setLabel("Hits");
-        dataSet.setData(values);
-        dataSet.setBackgroundColor(List.of("#1d4ed8", "#0f766e", "#7c3aed", "#475569"));
-        data.addChartDataSet(dataSet);
-        data.setLabels(labels);
-        rankingChartModel.setData(data);
     }
 
     private void addMessage(FacesMessage.Severity severity, String summary, String detail) {
@@ -289,15 +210,15 @@ public class SimulationDashboardController implements Serializable {
         return comparisonResults;
     }
 
-    public BarChartModel getFaultChartModel() {
+    public String getFaultChartModel() {
         return faultChartModel;
     }
 
-    public DonutChartModel getDistributionChartModel() {
+    public String getDistributionChartModel() {
         return distributionChartModel;
     }
 
-    public BarChartModel getRankingChartModel() {
+    public String getRankingChartModel() {
         return rankingChartModel;
     }
 }
